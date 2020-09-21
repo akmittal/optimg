@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"sync"
 
-	findImages "github.com/akmittal/pixer/server/src/findimages"
-	"github.com/akmittal/pixer/server/src/image"
+	findImages "github.com/akmittal/optimg/server/src/findimages"
+	"github.com/akmittal/optimg/server/src/image"
 	"github.com/h2non/bimg"
 )
 
@@ -58,7 +58,7 @@ func GetAllFilesAtPath(sourcePath string) (map[string][]os.FileInfo, error) {
 }
 
 func processAllDirectries(transformations Transformation) {
-	maxGoroutines := 4
+	maxGoroutines := 2
 	guard := make(chan struct{}, maxGoroutines)
 	imgMapping, err := GetAllFilesAtPath(transformations.SourcePath)
 

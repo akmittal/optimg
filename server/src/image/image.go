@@ -1,8 +1,10 @@
 package image
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -102,9 +104,23 @@ func (img *Image) ConvertAVIF(quality int) ([]byte, error) {
 func RunCavif(inputPath string, outputPath string, quality int) ([]byte, error) {
 	qualityFlag := fmt.Sprintf("--quality=%d", quality)
 	cmd := exec.Command("cavif", qualityFlag, inputPath, outputPath, "--overwrite")
-	err := cmd.Run()
+	stderr, err := cmd.StderrPipe()
 	if err != nil {
-		return nil, err
+		log.Fatal(err)
+	}
+	err = cmd.Start()
+	if err != nil {
+		log.Fatal(err)
+	}
+	slurp, _ := ioutil.ReadAll(stderr)
+	fmt.Printf("%s\n", slurp)
+
+	log.Printf("Waiting for command to finish...")
+	err = cmd.Wait()
+
+	if err != nil {
+		log.Printf("Command finished with error: %v", err)
+		return nil, errors.New(string(slurp))
 	}
 	return ioutil.ReadFile(outputPath)
 

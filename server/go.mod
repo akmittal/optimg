@@ -1,4 +1,4 @@
-module github.com/akmittal/pixer/server
+module github.com/akmittal/optimg/server
 
 go 1.15
 

@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/akmittal/pixer/server/src/web"
+	"github.com/akmittal/optimg/server/src/web"
 )
 
 func main() {
@@ -11,5 +11,4 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println("Server running")
 }
