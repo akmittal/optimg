@@ -7,7 +7,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"sync"
 
 	findImages "github.com/akmittal/optimg/server/src/findimages"
 	"github.com/akmittal/optimg/server/src/image"
@@ -46,33 +45,38 @@ func GetAllFilesAtPath(sourcePath string) (map[string][]os.FileInfo, error) {
 	}
 	result[sourcePath] = imgs
 	dirs, err := findImages.GetSubDirectories(sourcePath)
+
 	if err != nil {
 		return nil, err
 	}
 	for _, dir := range dirs {
 		dirPath := path.Join(sourcePath, dir.Name())
-		images, _ := findImages.GetImageFiles(dirPath)
-		result[dirPath] = images
+		images, _ := GetAllFilesAtPath(dirPath)
+		for k, v := range images {
+			result[k] = v
+		}
 	}
+
 	return result, nil
 }
 
 func processAllDirectries(transformations Transformation) {
-	maxGoroutines := 2
-	guard := make(chan struct{}, maxGoroutines)
+
 	imgMapping, err := GetAllFilesAtPath(transformations.SourcePath)
+	for sourcepath, _ := range imgMapping {
+
+		fmt.Println(sourcepath)
+
+	}
 
 	if err != nil {
 		fmt.Print(err)
 	}
 	for sourcepath, images := range imgMapping {
 		for _, file := range images {
-
 			path.Join(sourcepath, file.Name())
 		}
 	}
-
-	var wg sync.WaitGroup
 
 	for _, operation := range transformations.Operations {
 		for sourcepath, images := range imgMapping {
@@ -82,30 +86,29 @@ func processAllDirectries(transformations Transformation) {
 				if err != nil {
 					fmt.Println(err)
 				}
-				wg.Add(1)
-				go func(sourcepath string, operation image.Operation, file os.FileInfo, targetPath string, wg *sync.WaitGroup) {
-					Convert(sourcepath, operation, file, targetPath, wg)
-					<-guard
-				}(sourcepath, operation, file, targetPath, &wg)
+
+				Convert(sourcepath, operation, file, targetPath)
+
 			}
 		}
 	}
-	wg.Wait()
+
 }
 
-func Convert(imageSrc string, operation image.Operation, file os.FileInfo, targetPath string, wg *sync.WaitGroup) {
+func Convert(imageSrc string, operation image.Operation, file os.FileInfo, targetPath string) {
 	imagepath := path.Join(imageSrc, file.Name())
-	defer wg.Done()
 
 	img, err := image.FromPath(imagepath)
 	if err != nil {
 		// http.Error(rw, imagepath+err.Error(), http.StatusBadRequest)
-		fmt.Println(err)
+		fmt.Println("Error", err)
+		return
 	}
 	data, err := img.Convert(operation)
 	if err != nil {
 		// http.Error(rw, imagepath+err.Error(), http.StatusBadRequest)
-		fmt.Println(err)
+		fmt.Println("Error2", err)
+		return
 	}
 	if _, err := os.Stat(targetPath); os.IsNotExist(err) {
 		fmt.Println("MAKING", targetPath)
@@ -117,7 +120,8 @@ func Convert(imageSrc string, operation image.Operation, file os.FileInfo, targe
 	err = bimg.Write(targetimagepath, data)
 	if err != nil {
 		// http.Error(rw, imagepath+err.Error(), http.StatusBadRequest)
-		fmt.Println(err)
+		fmt.Println("Error3", err)
+		return
 	}
 
 }

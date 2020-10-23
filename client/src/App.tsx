@@ -1,14 +1,20 @@
 import React from "react";
+import Dashboard from "./components/Dashboard";
 import "./App.css";
 import "@rmwc/icon/styles";
+import { QueryCache, ReactQueryCacheProvider } from "react-query";
 
-import Dashboard from "./components/Dashboard";
+const queryCache = new QueryCache();
+
+
 
 function App() {
   return (
-    <div className="App">
-      <Dashboard />
-    </div>
+    <ReactQueryCacheProvider queryCache={queryCache}>
+      <div className="App">
+        <Dashboard />
+      </div>
+    </ReactQueryCacheProvider>
   );
 }
 

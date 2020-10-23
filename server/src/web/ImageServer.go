@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/akmittal/optimg/server/src/util"
 )
 
 const basePath = "/Users/amittal/images"
@@ -45,8 +47,8 @@ func getSupportedFormats(req *http.Request) []string {
 }
 
 func checkIfBetterFile(path string, supportedFormats []string) string {
-	extension := filepath.Ext(path)
-	filePathWithoutExt := path[0 : len(path)-len(extension)]
+	filePathWithoutExt := util.GetPathWithoutExtension(path)
+
 	for _, format := range supportedFormats {
 		optimalPath := filePathWithoutExt + format
 

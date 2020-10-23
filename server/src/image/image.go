@@ -97,20 +97,23 @@ func (img *Image) Convert(operation Operation) ([]byte, error) {
 }
 
 func (img *Image) ConvertAVIF(quality int) ([]byte, error) {
-	outPath := strings.Replace(img.Path, filepath.Ext(img.Path), ".avif", 0)
+	outName := strings.Replace(filepath.Base(img.Path), filepath.Ext(img.Path), ".avif", 0)
+	fmt.Println("outName", outName)
+	outPath := filepath.Join("/tmp", outName)
+	fmt.Println("outPath", outPath)
 	return RunCavif(img.Path, outPath, quality)
 }
 
 func RunCavif(inputPath string, outputPath string, quality int) ([]byte, error) {
 	qualityFlag := fmt.Sprintf("--quality=%d", quality)
-	cmd := exec.Command("cavif", qualityFlag, inputPath, outputPath, "--overwrite")
+	cmd := exec.Command("cavif", qualityFlag, inputPath, "-o", outputPath, "--overwrite", "--speed=5")
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	err = cmd.Start()
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	slurp, _ := ioutil.ReadAll(stderr)
 	fmt.Printf("%s\n", slurp)
