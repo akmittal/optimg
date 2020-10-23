@@ -2,7 +2,6 @@ package web
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -58,10 +57,14 @@ func Gallery(rw http.ResponseWriter, req *http.Request) {
 			imagePath := filepath.Join(path, file.Name())
 			image, err := getGalleryImage(imagePath, sourcePATH)
 			if err != nil {
-				fmt.Println(image)
+				http.Error(rw, err.Error(), http.StatusInternalServerError)
 			}
 			images.Main = image
-			images.Varients = getImageVarients(image)
+			images.Varients, err = getImageVarients(image)
+			if err != nil {
+				http.Error(rw, err.Error(), http.StatusInternalServerError)
+				return
+			}
 			result = append(result, images)
 			totalResults = len(result)
 
@@ -78,7 +81,7 @@ func Gallery(rw http.ResponseWriter, req *http.Request) {
 
 }
 
-func getImageVarients(image GalleryImage) []GalleryImage {
+func getImageVarients(image GalleryImage) ([]GalleryImage, error) {
 	var result []GalleryImage
 
 	targetFilename := filepath.Join(targetPath, image.Path)
@@ -90,12 +93,12 @@ func getImageVarients(image GalleryImage) []GalleryImage {
 		} else {
 			image, err := getGalleryImage(newFilePath, targetPath)
 			if err != nil {
-				fmt.Println(image)
+				return nil, err
 			}
 
 			result = append(result, image)
 		}
 	}
-	return result
+	return result, nil
 
 }

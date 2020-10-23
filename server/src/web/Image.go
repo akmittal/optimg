@@ -20,11 +20,16 @@ func ImageHandler(rw http.ResponseWriter, req *http.Request) {
 	imagePath := filepath.Join(sourcePATH, path)
 	image, err := getGalleryImage(imagePath, sourcePATH)
 	if err != nil {
-		fmt.Println(err)
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	result.Main = image
-	result.Varients = getImageVarients(image)
+	result.Varients, err = getImageVarients(image)
+	if err != nil {
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	json.NewEncoder(rw).Encode(result)
 }
 

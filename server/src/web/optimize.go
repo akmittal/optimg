@@ -8,9 +8,9 @@ import (
 	"path"
 	"path/filepath"
 
+	"github.com/akmittal/bimg"
 	findImages "github.com/akmittal/optimg/server/src/findimages"
 	"github.com/akmittal/optimg/server/src/image"
-	"github.com/h2non/bimg"
 )
 
 type Transformation struct {
