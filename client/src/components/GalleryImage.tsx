@@ -10,7 +10,7 @@ export default function GalleryImage(props: Props): ReactElement {
   const params = new URLSearchParams(location.search);
   const path = params.get("path") || "";
   const { isLoading, error, data } = useQuery("image", () =>
-    fetch(`/img?path=${path}`).then((res) => res.json())
+    fetch(`/api/img?path=${path}`).then((res) => res.json())
   );
   useEffect(() => {
     return () => {};
@@ -27,8 +27,9 @@ export default function GalleryImage(props: Props): ReactElement {
       <ImageCard
         height={data["Main"]["Height"]}
         width={data["Main"]["Width"]}
-        name={data["Main"]["Path"]}
-        imageURL={`/images/src${data["Main"]["Path"]}`}
+        path={data["Main"]["Path"]}
+        name={data["Main"]["Name"]}
+        imageURL={`/api/images/src/${data["Main"]["Path"]}`}
         modified={data["Main"]["Modified"]}
         size={data["Main"]["Size"]}
         full
@@ -39,8 +40,9 @@ export default function GalleryImage(props: Props): ReactElement {
           <ImageCard
             height={varient["Height"]}
             width={varient["Width"]}
-            name={varient["Path"]}
-            imageURL={`/images/target${varient["Path"]}`}
+            path={varient["Path"]}
+            name={varient["Name"]}
+            imageURL={`/api/images/target/${varient["Path"]}`}
             modified={varient["Modified"]}
             size={varient["Size"]}
             full

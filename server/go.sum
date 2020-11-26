@@ -2,3 +2,5 @@ github.com/akmittal/bimg v1.1.5 h1:0Lp0pth/a//qH9MnqSxYHCm7+AAqZj1iAiOoy6vn/Hc=
 github.com/akmittal/bimg v1.1.5/go.mod h1:7tkKrxZoNy35ajupvuD453F/d+VPKwYSOFSDMRCDZcw=
 github.com/go-chi/chi v4.1.2+incompatible h1:fGFk2Gmi/YKXk0OmGfBh0WgmN3XB8lVnEyNz34tQRec=
 github.com/go-chi/chi v4.1.2+incompatible/go.mod h1:eB3wogJHnLi3x/kFX2A+IbTBlXxmMeXJVKy9tTv1XzQ=
+github.com/joho/godotenv v1.3.0 h1:Zjp+RcGpHhGlrMbJzXTrZZPrWj+1vfm90La1wgB6Bhc=
+github.com/joho/godotenv v1.3.0/go.mod h1:7hK45KPybAkOC6peb+G5yklZfMxEjkZhHbwpqxOKXbg=

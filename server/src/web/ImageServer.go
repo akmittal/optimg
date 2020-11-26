@@ -10,8 +10,6 @@ import (
 	"github.com/akmittal/optimg/server/src/util"
 )
 
-const basePath = "/Users/amittal/images"
-
 var optimalformats = [2]string{".avif", ".webp"}
 
 func ImageServer(rw http.ResponseWriter, req *http.Request) {
@@ -23,7 +21,7 @@ func ImageServer(rw http.ResponseWriter, req *http.Request) {
 	quality := query["q"]
 	scale := query["s"]
 	fmt.Println(format, width, height, quality, scale, req.URL.Path)
-	imagePath := filepath.Join(basePath, req.URL.Path)
+	imagePath := filepath.Join(targetPath, req.URL.Path)
 	supportedFormats := getSupportedFormats(req)
 	imagePath = checkIfBetterFile(imagePath, supportedFormats)
 	extension := filepath.Ext(imagePath)

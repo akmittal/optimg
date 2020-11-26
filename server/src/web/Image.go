@@ -56,5 +56,6 @@ func getGalleryImage(path string, rootPath string) (GalleryImage, error) {
 	image.Path = strings.Replace(path, rootPath, "", 1)
 	image.Size = file.Size()
 	image.Modified = file.ModTime()
+	image.Name = file.Name()
 	return image, nil
 }

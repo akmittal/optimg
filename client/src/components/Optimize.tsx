@@ -1,4 +1,4 @@
-/** @jsx jsx */
+/** @jsxImportSource @emotion/core */
 import React, { ReactElement, Fragment, useReducer } from "react";
 import { TextField } from "@rmwc/textfield";
 import { FormField } from "@rmwc/formfield";
@@ -8,7 +8,7 @@ import { Slider } from "@rmwc/slider";
 import { Tooltip } from "@rmwc/tooltip";
 import { Button } from "@rmwc/button";
 import { Icon } from "@rmwc/icon";
-import { css, jsx } from "@emotion/core";
+import { css } from "@emotion/core";
 import { IconButton } from "rmwc";
 import Header from "./Header";
 import { useMutation } from "react-query";
@@ -157,7 +157,7 @@ function Optimize({}: Props): ReactElement {
         format: parseInt(operation.format),
       })),
     };
-    return fetch("/optimize", { method: "POST", body: JSON.stringify(body) });
+    return fetch("/api/optimize", { method: "POST", body: JSON.stringify(body) });
   });
 
   return (

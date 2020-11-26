@@ -2,6 +2,8 @@ package web
 
 import (
 	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -10,6 +12,7 @@ import (
 	"time"
 
 	"github.com/akmittal/optimg/server/src/util"
+	"github.com/joho/godotenv"
 )
 
 var targetExtensions = []string{".avif", ".webp", ".jpg", ".png"}
@@ -20,6 +23,7 @@ type GalleryImages struct {
 }
 
 type GalleryImage struct {
+	Name     string
 	Path     string
 	Height   int
 	Width    int
@@ -27,12 +31,21 @@ type GalleryImage struct {
 	Modified time.Time
 }
 
-const (
-	sourcePATH = "/Users/amittal/projects/images"
-	targetPath = "/Users/amittal/images"
+var (
+	sourcePATH = os.Getenv("IMAGE_PATH") + "/source"
+	targetPath = os.Getenv("IMAGE_PATH") + "/dest"
 )
 
+func init() {
+	if err := godotenv.Load(); err != nil {
+		log.Print("No .env file found")
+	}
+	sourcePATH = os.Getenv("IMAGE_PATH") + "/source"
+	targetPath = os.Getenv("IMAGE_PATH") + "/dest"
+}
+
 func Gallery(rw http.ResponseWriter, req *http.Request) {
+	fmt.Println("sourcePath" + sourcePATH)
 	var result []GalleryImages
 	imgMapping, err := GetAllFilesAtPath(sourcePATH)
 	query := req.URL.Query()

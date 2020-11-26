@@ -8,14 +8,14 @@ import (
 
 func Start() error {
 	r := chi.NewRouter()
-	r.Post("/optimize", Optimize)
-	r.Get("/gallery", Gallery)
-	r.Get("/img", ImageHandler)
-	r.Handle("/images/src/*", http.StripPrefix("/images/src/", http.FileServer(http.Dir("/Users/amittal/projects/images"))))
-	r.Handle("/images/target/*", http.StripPrefix("/images/target/", http.FileServer(http.Dir("/Users/amittal/images"))))
+	r.Post("/api/optimize", Optimize)
+	r.Get("/api/gallery", Gallery)
+	r.Get("/api/img", ImageHandler)
+	r.Handle("/api/images/src/*", http.StripPrefix("/api/images/src/", http.FileServer(http.Dir(sourcePATH))))
+	r.Handle("/api/images/target/*", http.StripPrefix("/api/images/target/", http.FileServer(http.Dir(targetPath))))
 	imageRouter := chi.NewRouter()
-	imageRouter.HandleFunc("/*", ImageServer)
-	go http.ListenAndServe(":4000", imageRouter)
+	imageRouter.HandleFunc("/api/*", ImageServer)
+	go http.ListenAndServe(":8001", imageRouter)
 
-	return http.ListenAndServe(":3000", r)
+	return http.ListenAndServe(":8000", r)
 }

@@ -17,6 +17,8 @@ import { Link } from "react-router-dom";
 
 interface Props {
   full?: boolean;
+  path?: string;
+  varients?:number;
   imageURL: string;
   height: number;
   width: number;
@@ -26,7 +28,7 @@ interface Props {
 }
 
 export default function ImageCard(props: Props): ReactElement {
-  const { imageURL, height, width, modified, size, full, name } = props;
+  const { imageURL, height, width, modified, size, full, name, path, varients } = props;
   return (
     <Card>
       <CardPrimaryAction>
@@ -59,12 +61,12 @@ export default function ImageCard(props: Props): ReactElement {
       {!full && (
         <CardActions className="flex justify-between">
           <CardActionButtons>
-            <Link to={`/gallery/image?path=${imageURL}`}>
+            <Link to={`/gallery/image?path=${path}`}>
               <CardActionButton>Open</CardActionButton>
             </Link>
           </CardActionButtons>
           <div>
-            <Chip selected label="3 Varients" />
+            <Chip selected label={`${varients} Varients`} />
           </div>
         </CardActions>
       )}

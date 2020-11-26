@@ -10,7 +10,7 @@ interface Props {}
 export default function Gallery(props: Props): ReactElement {
   const [currentPage, setCurrentPage] = useState(0);
   const { isLoading, error, data, refetch } = useQuery("repoData", () =>
-    fetch(`/gallery?page=${currentPage}`).then((res) => res.json())
+    fetch(`/api/gallery?page=${currentPage}`).then((res) => res.json())
   );
   useEffect(() => {
     refetch();
@@ -27,12 +27,14 @@ export default function Gallery(props: Props): ReactElement {
       <section className="flex flex-row flex-wrap justify-around">
         {data.Data.map((item: any) => (
           <ImageCard
-            name={item.Main.Path}
-            imageURL={item.Main.Path}
+            name={item.Main.Name}
+            imageURL={`/api/images/src${item.Main.Path}`}
+            path={`${item.Main.Path}`}
             height={item.Main.Height}
             width={item.Main.Width}
             size={item.Main.Size}
             modified={item.Main.Modified}
+            varients={item.Varients.length}
           />
         ))}
       </section>
