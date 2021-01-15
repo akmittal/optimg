@@ -1,20 +1,15 @@
-import React, { Component } from 'react'
+import React, { ReactElement } from 'react'
 
 interface Props {
     
 }
-interface State {
-    
+
+function About({}: Props): ReactElement {
+    return (
+        <div>
+            About Page
+        </div>
+    )
 }
 
-export default class About extends Component<Props, State> {
-    state = {}
-
-    render() {
-        return (
-            <div>
-                About
-            </div>
-        )
-    }
-}
+export default About

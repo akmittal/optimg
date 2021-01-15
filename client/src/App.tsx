@@ -1,20 +1,46 @@
-import React from "react";
-import Dashboard from "./components/Dashboard";
-import "./App.css";
-import "@rmwc/icon/styles";
-import { QueryCache, ReactQueryCacheProvider } from "react-query";
+import React from 'react';
+import 'antd/dist/antd.css';
 
-const queryCache = new QueryCache();
+import './App.css';
 
+import { BrowserRouter as Router } from 'react-router-dom';
+import { Layout } from 'antd';
 
+import Routes from './Routes';
+import Navbar from './components/Navbar';
+import Drawer from './components/Drawer';
+import { Content } from 'antd/lib/layout/layout';
+import { QueryClient, QueryClientProvider } from 'react-query';
+const queryClient = new QueryClient()
 
 function App() {
   return (
-    <ReactQueryCacheProvider queryCache={queryCache}>
-      <div className="App">
-        <Dashboard />
-      </div>
-    </ReactQueryCacheProvider>
+    <QueryClientProvider client={queryClient}>
+    <Router>
+      <Layout>
+        
+        <Layout>
+          <Drawer />
+          <Layout className="ml-56">
+            <Navbar title="Optimg" routes={[{breadcrumbName: "Home", path:"/"},{breadcrumbName: "Home", path:"/"}]} />
+            
+            <Content
+              className="site-layout-background"
+              style={{
+                padding: 24,
+                margin: 0,
+                minHeight: 280,
+              }}
+            >
+              <Routes />
+            </Content>
+          </Layout>
+        </Layout>
+      </Layout>
+      {/* A <Switch> looks through its children <Route>s and
+          renders the first one that matches the current URL. */}
+    </Router>
+    </QueryClientProvider>
   );
 }
 
