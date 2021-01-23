@@ -26,7 +26,7 @@ func Get(path string, sourcePath string) (*Image, error) {
 	if err != nil {
 		return nil, err
 	}
-	relativeFilePath, _ := filepath.Rel(sourcePath, path)
+	relativeFilePath, _ := filepath.Rel(sourcePath, filepath.Dir(path))
 	return &Image{
 		Image: bimg.NewImage(imageBytes),
 		Path:  relativeFilePath,

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/akmittal/optimg/server/pkg/util"
 	"gorm.io/gorm"
 )
 
@@ -17,7 +18,12 @@ func HandleStartOperation(db *gorm.DB) http.HandlerFunc {
 			return
 		}
 
-		newOperation, _ := Get(opr.SourcePath, opr.TargetPath, opr.CopyUnknown, opr.Monitor, opr.Transformations)
+		newOperation, err := Get(opr.SourcePath, opr.TargetPath, opr.CopyUnknown, opr.Monitor, opr.Transformations)
+
+		if err != nil {
+			util.HTTPError(rw, util.Error{Msg: err.Error()}, http.StatusBadRequest)
+			return
+		}
 		tx := db.Create(&newOperation)
 		tx.Commit()
 		err = newOperation.Process(db)

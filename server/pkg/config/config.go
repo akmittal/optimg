@@ -19,7 +19,7 @@ func Get() *Config {
 	flag.StringVar(&conf.dbPath, "dbpath", os.Getenv("SQLITE_PATH"), "DB PATH")
 
 	flag.StringVar(&conf.dbName, "dbname", os.Getenv("SQLITE_DB"), "DB name")
-	flag.StringVar(&conf.appHost, "appHost", os.Getenv("APP_HOST"), "APP HOST")
+	flag.StringVar(&conf.appHost, "apphost", os.Getenv("APP_HOST"), "APP HOST")
 
 	flag.Parse()
 

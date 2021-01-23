@@ -8,6 +8,7 @@ require (
 	github.com/h2non/bimg v1.1.5
 	github.com/h2non/filetype v1.1.0
 	github.com/joho/godotenv v1.3.0
+	github.com/spf13/cobra v1.1.1
 	gorm.io/driver/sqlite v1.1.4
 	gorm.io/gorm v1.20.10
 )

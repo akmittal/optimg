@@ -52,7 +52,7 @@ function Gallery({}: Props): ReactElement {
                   cover={
                     <img
                       alt="example"
-                      src={`/api/static/source/${image.image.name}`}
+                      src={`/api/static/source/${image.image.path}/${image.image.name}`}
                     />
                   }
                 >

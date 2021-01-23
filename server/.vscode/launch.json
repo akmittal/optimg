@@ -12,6 +12,7 @@
                 "CGO_CFLAGS_ALLOW":"-Xpreprocessor"
             },
             "args": [
+                "server"
                
             ]
         }

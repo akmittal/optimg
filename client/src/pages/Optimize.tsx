@@ -8,7 +8,7 @@ import { useMutation } from 'react-query';
 const { Option } = Select;
 
 interface Transformation {
-  format: number;
+  format: string;
   quality: number;
 }
 
@@ -16,6 +16,11 @@ interface Operation {
   sourcePath: string;
   targetPath: string;
   transformations: Transformation[];
+}
+interface Action {
+  type: string;
+  data?: any;
+  index?: number;
 }
 
 interface Props {}
@@ -37,63 +42,69 @@ const formItemLayoutWithOutLabel = {
   },
 };
 
+const initialState: Operation = {
+  sourcePath: '',
+  targetPath: '',
+  transformations: [
+    { format: '10', quality: 75 },
+    { format: '2', quality: 75 },
+    { format: '0', quality: 75 },
+  ],
+};
+function Reducer(state: Operation = initialState, action: Action): Operation {
+  switch (action.type) {
+    case 'setSourcePath':
+      return { ...state, sourcePath: action.data };
+
+    case 'setTargetPath':
+      return { ...state, targetPath: action.data };
+
+    case 'changeQuality':
+      return {
+        ...state,
+        transformations: state.transformations.map(
+          (item: any, index: number) => {
+            if (index === action.index) {
+              return { ...item, quality: action.data };
+            }
+            return item;
+          }
+        ),
+      };
+    case 'changeFormat':
+      return {
+        ...state,
+        transformations: state.transformations.map(
+          (item: any, index: number) => {
+            if (index === action.index) {
+              return { ...item, format: action.data };
+            }
+            return item;
+          }
+        ),
+      };
+    case 'addVarient':
+      return {
+        ...state,
+        transformations: [
+          ...state.transformations,
+          { quality: 75, format: '10' },
+        ],
+      };
+    case 'removeVarient':
+      return {
+        ...state,
+        transformations: state.transformations.filter(
+          (transformation: any, index: number) => index !== action.index
+        ),
+      };
+    default:
+      return state;
+  }
+}
+
 function Optimize({}: Props): ReactElement {
-  const [state, dispatch] = useReducer(
-    function reducer(state: any, action: any) {
-      switch (action.type) {
-        case 'setSourcePath':
-          return { ...state, sourcePath: action.data };
-
-        case 'setTargetPath':
-          return { ...state, targetPath: action.data };
-
-        case 'changeQuality':
-          return {
-            ...state,
-            transformations: state.transformations.map(
-              (item: any, index: number) => {
-                if (index === action.index) {
-                  return { ...item, quality: action.data };
-                }
-                return item;
-              }
-            ),
-          };
-        case 'changeFormat':
-          return {
-            ...state,
-            transformations: state.transformations.map(
-              (item: any, index: number) => {
-                if (index === action.index) {
-                  return { ...item, format: action.data };
-                }
-                return item;
-              }
-            ),
-          };
-        case 'addVarient':
-          return {
-            ...state,
-            transformations: [
-              ...state.transformations,
-              { quality: 75, format: 'avif' },
-            ],
-          };
-        case 'removeVarient':
-          return {
-            ...state,
-            transformations: state.transformations.filter(
-              (transformation: any, index: number) => index !== action.index
-            ),
-          };
-      }
-    },
-    {
-      sourcePath: '',
-      targetPath: '',
-      transformations: [],
-    }
-  );
+  const [state, dispatch] = useReducer(Reducer, initialState);
   const { isError, isLoading, mutateAsync, isSuccess, error } = useMutation<
     any,
     any
@@ -106,120 +117,122 @@ function Optimize({}: Props): ReactElement {
     return fetch('/api/optimize', {
       body: JSON.stringify(body),
       method: 'POST',
-    }).then(res => res.json());
+    }).then((res: Response) => {
+      if (res.status === 200) return res.json();
+      throw res.json()
+    });
   });
 
   const [form] = Form.useForm();
+ 
+  if (isSuccess) {
+    return <div>images optimized</div>;
+  }
   return (
-    <>
-      {isError && error ? <div>An error occurred: {error?.message}</div> : null}
+    <div>
+      <Title level={3}>Optimize</Title>
+      <Form
+        layout="vertical"
+        form={form}
+        initialValues={{ layout: 'vertical' }}
+        onValuesChange={() => {}}
+        onSubmitCapture={() => {
+          console.log(state);
+        }}
+      >
+        <Form.Item label="Source Path">
+          <Input
+            placeholder="Source Path eg. /mnt/images/source"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              dispatch({ type: 'setSourcePath', data: e.currentTarget.value })
+            }
+          />
+        </Form.Item>
+        <Form.Item label="Destination Path">
+          <Input
+            placeholder="Destination Path eg. /mnt/images/target"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              dispatch({ type: 'setTargetPath', data: e.currentTarget.value })
+            }
+          />
+        </Form.Item>
+        <Checkbox onChange={() => {}}>Copy Unknown</Checkbox>
+        <Checkbox onChange={() => {}}>Monitor</Checkbox>
 
-      {isSuccess ? <div>Todo added!</div> : null}
-      <div>
-        <Title level={3}>Optimize</Title>
-        <Form
-          layout="vertical"
-          form={form}
-          initialValues={{ layout: 'vertical' }}
-          onValuesChange={() => {}}
-          onSubmitCapture={() => {
-            console.log(state);
-          }}
-        >
-          <Form.Item label="Source Path">
-            <Input
-              placeholder="Source Path"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                dispatch({ type: 'setSourcePath', data: e.currentTarget.value })
-              }
-            />
-          </Form.Item>
-          <Form.Item label="Destination Path">
-            <Input
-              placeholder="Destination Path"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                dispatch({ type: 'setTargetPath', data: e.currentTarget.value })
-              }
-            />
-          </Form.Item>
-          <Checkbox onChange={() => {}}>Copy Unknown</Checkbox>
-          <Checkbox onChange={() => {}}>Monitor</Checkbox>
-
-          {state.transformations.map((field: any, index: number) => (
-            <Form.Item
-              style={{ display: 'flex' }}
-              {...(index === 0 ? formItemLayout : formItemLayoutWithOutLabel)}
-              label={index === 0 && <Title level={3}>Varients</Title>}
-              required={false}
-              key={field.key}
-            >
-              <Form.Item label="Format" style={{ display: 'inline-block' }}>
-                <Select
-                  value={field['format']}
-                  style={{ width: '160px' }}
-                  placeholder="Select Format"
-                  onChange={(e: any) =>
-                    dispatch({ type: 'changeFormat', index, data: e })
-                  }
-                >
-                  <Option value="10">AVIF</Option>
-                  <Option value="2">WebP</Option>
-                  <Option value="1">JPEG</Option>
-                  <Option value="0">Source Format</Option>
-                </Select>
-              </Form.Item>
-              <Form.Item
-                label="Quality"
-                style={{
-                  display: 'inline-block',
-                  margin: '0px 20px',
-                  width: 'calc( 50% - 100px) ',
-                }}
+        {state.transformations.map((field: any, index: number) => (
+          <Form.Item
+            style={{ display: 'flex' }}
+            {...(index === 0 ? formItemLayout : formItemLayoutWithOutLabel)}
+            label={index === 0 && <Title level={3}>Varients</Title>}
+            required={false}
+            key={field.key}
+          >
+            <Form.Item label="Format" style={{ display: 'inline-block' }}>
+              <Select
+                value={field['format']}
+                style={{ width: '160px' }}
+                placeholder="Select Format"
+                onChange={(e: any) =>
+                  dispatch({ type: 'changeFormat', index, data: e })
+                }
               >
-                <Slider
-                  tooltipVisible={true}
-                  tooltipPlacement="top"
-                  onChange={(e: any) => {
-                    console.log(e);
-                    dispatch({ type: 'changeQuality', index, data: e });
-                  }}
-                  value={field['quality']}
-                />
-              </Form.Item>
-
-              {state.transformations.length > 1 && (
-                <MinusCircleOutlined
-                  style={{ display: 'inline-block', margin: '35px auto' }}
-                  className="dynamic-delete-button"
-                  onClick={() => dispatch({ type: 'removeVarient', index })}
-                />
-              )}
+                <Option value="10">AVIF</Option>
+                <Option value="2">WebP</Option>
+                <Option value="1">JPEG</Option>
+                <Option value="0">Source Format</Option>
+              </Select>
             </Form.Item>
-          ))}
-          <Form.Item>
-            <Button
-              type="dashed"
-              onClick={() => dispatch({ type: 'addVarient' })}
-              style={{ width: '60%' }}
-              icon={<PlusOutlined />}
-            >
-              Add Varient
-            </Button>
-          </Form.Item>
-
-          <Form.Item>
-            <Button
-              type="primary"
-              onClick={() => {
-                mutateAsync();
+            <Form.Item
+              label="Quality"
+              style={{
+                display: 'inline-block',
+                margin: '0px 20px',
+                width: 'calc( 50% - 100px) ',
               }}
             >
-              Submit
-            </Button>
+              <Slider
+                tooltipVisible={true}
+                tooltipPlacement="top"
+                onChange={(e: any) => {
+                  console.log(e);
+                  dispatch({ type: 'changeQuality', index, data: e });
+                }}
+                value={field['quality']}
+              />
+            </Form.Item>
+
+            {state.transformations.length > 1 && (
+              <MinusCircleOutlined
+                style={{ display: 'inline-block', margin: '35px auto' }}
+                className="dynamic-delete-button"
+                onClick={() => dispatch({ type: 'removeVarient', index })}
+              />
+            )}
           </Form.Item>
-        </Form>
-      </div>
-    </>
+        ))}
+        <Form.Item>
+          <Button
+            type="dashed"
+            onClick={() => dispatch({ type: 'addVarient' })}
+            style={{ width: '60%' }}
+            icon={<PlusOutlined />}
+          >
+            Add Varient
+          </Button>
+        </Form.Item>
+
+        <Form.Item>
+          <Button
+            type="primary"
+            onClick={() => {
+              mutateAsync();
+            }}
+          >
+            Submit
+          </Button>
+        </Form.Item>
+      </Form>
+    </div>
   );
 }
 

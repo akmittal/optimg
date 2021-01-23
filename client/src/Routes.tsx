@@ -23,7 +23,7 @@ function Routes({}: Props): ReactElement {
         <Route path="/gallery/:path?/:pageNo?">
           <Gallery />
         </Route>
-        <Route path="/image/:path?/:name?">
+        <Route path="/image/:path?/:name">
           <Image />
         </Route>
         <Route path="/compare">
