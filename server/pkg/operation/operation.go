@@ -22,8 +22,11 @@ var (
 )
 
 type Transformation struct {
-	Quality int            `json:"quality"`
-	Format  bimg.ImageType `json:"format"`
+	*gorm.Model
+	Quality      int            `json:"quality"`
+	Format       bimg.ImageType `json:"format"`
+	OperationRef uint
+	Images       []image.Image `gorm:"foreignKey:TransformationRef"`
 }
 
 type Operation struct {
@@ -32,7 +35,8 @@ type Operation struct {
 	TargetPath      string           `json:"targetPath"`
 	CopyUnknown     bool             `json:"copyUnknown"`
 	Monitor         bool             `json:"monitor"`
-	Transformations []Transformation `json:"transformations"`
+	Transformations []Transformation `json:"transformations" gorm:"foreignKey:OperationRef"`
+	Images          []image.Image    `gorm:"foreignKey:OperationRef"`
 }
 
 // Get Returns instance of Operation
@@ -50,44 +54,51 @@ func Get(sourcePath string, targetPath string, copyUnknown bool, monitor bool, t
 }
 
 func (o *Operation) Process(db *gorm.DB) error {
+	tx := db.Create(o)
 
 	images, err := image.GetImagesByPath(o.SourcePath)
 	if err != nil {
 		return err
 	}
 
-	err = processImages(images, o.SourcePath, o.TargetPath, ".", o.Transformations, db)
+	err = processImages(images, *o, ".", db)
+	tx.Commit()
 
 	return err
 }
-func processImages(images []string, sourcePath string, targetPath string, relPath string, transformations []Transformation, db *gorm.DB) error {
-	destDir := filepath.Join(targetPath, relPath)
+func processImages(images []string, operation Operation, relPath string, db *gorm.DB) error {
+	destDir := filepath.Join(operation.TargetPath, relPath)
 	if _, err := os.Stat(destDir); os.IsNotExist(err) {
 		os.MkdirAll(destDir, 0755)
 	}
 	for _, img := range images {
-		absPath := filepath.Join(sourcePath, relPath, img)
-		sourceImage, err := image.Get(absPath, sourcePath)
+		absPath := filepath.Join(operation.SourcePath, relPath, img)
+		sourceImage, err := image.Get(absPath, operation.SourcePath)
+		sourceImage.OperationRef = operation.ID
+
 		if err != nil {
 			return err
 		}
-		err = PerformTransformations(sourceImage, db, sourcePath, targetPath, transformations)
+		db.Create(sourceImage)
+		varientImages, err := PerformTransformations(sourceImage, db, &operation)
+		db.Create(varientImages)
 
 	}
-	dirs, err := image.GetSubDirectoriesByPath(filepath.Join(sourcePath, relPath))
+	db.Commit()
+	dirs, err := image.GetSubDirectoriesByPath(filepath.Join(operation.SourcePath, relPath))
 	if err != nil {
 		return err
 	}
 
 	for _, dir := range dirs {
-		dirPath := filepath.Join(sourcePath, relPath, dir)
+		dirPath := filepath.Join(operation.SourcePath, relPath, dir)
 		// targetPath := filepath.Join(targetPath, dir)
 		images, err := image.GetImagesByPath(dirPath)
 		if err != nil {
 			return err
 		}
 		relPath := filepath.Join(relPath, dir)
-		processImages(images, sourcePath, targetPath, relPath, transformations, db)
+		processImages(images, operation, relPath, db)
 	}
 	return nil
 }
@@ -115,27 +126,29 @@ func (o *Operation) Validate() error {
 	return nil
 }
 
-func PerformTransformations(i *image.Image, db *gorm.DB, sourcePath string, targetPath string, transformations []Transformation) error {
-	tx := db.Create(i)
-	for _, transformation := range transformations {
+func PerformTransformations(i *image.Image, db *gorm.DB, o *Operation) ([]image.Image, error) {
+	var varientImages []image.Image
+	for _, transformation := range o.Transformations {
 
 		convertedImg, err := i.Process(bimg.Options{
 			Quality: (transformation.Quality),
 			Type:    transformation.Format,
 		})
-		targetFilepath := getTargetFilePath(i.Name, filepath.Join(targetPath, i.Path), transformation.Format)
+		targetFilepath := getTargetFilePath(i.Name, filepath.Join(o.TargetPath, i.Path), transformation.Format)
 
 		err = bimg.Write(targetFilepath, convertedImg)
 		if err != nil {
-			return err
+			return varientImages, err
 		}
-		targetImage, err := image.Get(targetFilepath, targetPath)
+		targetImage, err := image.Get(targetFilepath, o.TargetPath)
 		targetImage.ParentID = i.ID
-		tx = db.Create(&targetImage)
+		targetImage.OperationRef = o.ID
+		varientImages = append(varientImages, *targetImage)
+		targetImage.TransformationRef = transformation.ID
+
 	}
 
-	tx.Commit()
-	return nil
+	return varientImages, nil
 }
 func getTargetFilePath(fileName string, targetPath string, format bimg.ImageType) string {
 	targetExtenstion := bimg.ImageTypes[format]

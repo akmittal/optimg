@@ -52,7 +52,7 @@ func HandleGallery(db *gorm.DB) http.HandlerFunc {
 		db.Where(&Image{}, "parent_id").Limit(PageLimit).Offset(PageLimit * (page - 1)).Find(&images)
 		rw.Header().Add("Content-Type", "application/json")
 		for _, image := range images {
-			
+
 			var varientImages []Image
 			db.Where(&Image{ParentID: image.ID}).Find(&varientImages)
 			var imageData ImageData

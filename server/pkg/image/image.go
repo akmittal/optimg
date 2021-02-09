@@ -10,11 +10,13 @@ import (
 
 type Image struct {
 	*gorm.Model
-	*bimg.Image `gorm:"-"`
-	Path        string `json:"path"`
-	Name        string `json:"name"`
-	Size        int64  `json:"size"`
-	ParentID    uint   `json:"parentID"`
+	*bimg.Image       `gorm:"-"`
+	Path              string `json:"path"`
+	Name              string `json:"name"`
+	Size              int64  `json:"size"`
+	ParentID          uint   `json:"parentID"`
+	OperationRef      uint
+	TransformationRef uint
 }
 
 func Get(path string, sourcePath string) (*Image, error) {

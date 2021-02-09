@@ -36,10 +36,10 @@ function Gallery({}: Props): ReactElement {
         <div>
           <Row gutter={[16, 16]}>
             {data.images && data.images.map((image: any) => (
-              <Col span={8}>
+              <Col span={8} xxl={4} xl={6} md={8} sm={12} xs={16}>
                 <Card
                   hoverable
-                  style={{ width: 240 }}
+                  // style={{ width: 240 }}
                   actions={[
                     <Link
                       to={`/image/${encodeURIComponent(

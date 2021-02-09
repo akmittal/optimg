@@ -37,10 +37,14 @@ func Get() (*Application, error) {
 func (a *Application) Start() error {
 	a.RegisterRoutes()
 	// Migrate the schema
-	a.DB.Client.AutoMigrate(&image.Image{})
+	a.DB.Client.AutoMigrate(&image.Image{}, &operation.Operation{}, &operation.Transformation{})
 
 	return a.Server.Start()
 
+}
+func (a *Application) StartStaticServer(path string) error {
+	a.Router.Handle("/public/{path:*}", image.ImageServer(path))
+	return a.Server.Start()
 }
 
 func (a *Application) RegisterRoutes() {
@@ -51,6 +55,7 @@ func (a *Application) RegisterRoutes() {
 	a.Router.Get("/api/image", image.ImageController(a.DB.Client))
 	a.Router.Handle("/api/static/source/*", image.HandleStaticSource())
 	a.Router.Handle("/api/static/dest/*", image.HandleStaticDest())
-	a.Router.Handle("/public/{path:*}", image.ImageServer())
+	a.Router.Handle("/api/stats", operation.HandleStats(a.DB.Client))
+	a.Router.Handle("/public/{path:*}", image.ImageServer("/Users/amittal"))
 
 }

@@ -2,7 +2,6 @@ package image
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -17,19 +16,14 @@ type Images struct {
 	Varients []Image `json:"varients"`
 }
 
-const basePath = "/Users/amittal/images/dest"
-
 var optimalformats = [2]string{".avif", ".webp"}
 
-func ImageServer() http.HandlerFunc {
+func ImageServer(basePath string) http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
 		// query := req.URL.Query()
 
-		// format := query["format"]
-		fmt.Println("auto")
-
 		imagePath := filepath.Join(basePath, chi.URLParam(req, "path"))
-		fmt.Print(chi.URLParam(req, "path"))
+
 		supportedFormats := getSupportedFormats(req)
 		imagePath = checkIfBetterFile(imagePath, supportedFormats)
 		extension := filepath.Ext(imagePath)

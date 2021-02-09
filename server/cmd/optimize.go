@@ -46,10 +46,11 @@ func init() {
 	rootCmd.AddCommand(optimizeCmd)
 	optimizeCmd.Flags().StringP("sourcePath", "s", "/tmp", "Source Image Path")
 	optimizeCmd.Flags().StringP("targetPath", "t", "/tmp", "Image Path where to store images")
-	optimizeCmd.Flags().BoolP("copyUnknown", "u", false, "Copy no-image/unsuppported files")
+	// optimizeCmd.Flags().BoolP("copyUnknown", "u", false, "Copy no-image/unsuppported files")
 	optimizeCmd.Flags().StringSliceP("format", "f", []string{}, "Image format")
 	optimizeCmd.Flags().IntSliceP("quality", "q", []int{}, "Image quality")
 	optimizeCmd.MarkFlagRequired("sourcePath")
 	optimizeCmd.MarkFlagRequired("targetPath")
-	optimizeCmd.MarkFlagRequired("varients")
+	optimizeCmd.MarkFlagRequired("format")
+	optimizeCmd.MarkFlagRequired("quality")
 }

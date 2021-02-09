@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strconv"
 )
 
 type Config struct {
@@ -11,6 +12,7 @@ type Config struct {
 
 	dbName  string
 	appHost string
+	appPort int
 }
 
 func Get() *Config {
@@ -20,6 +22,8 @@ func Get() *Config {
 
 	flag.StringVar(&conf.dbName, "dbname", os.Getenv("SQLITE_DB"), "DB name")
 	flag.StringVar(&conf.appHost, "apphost", os.Getenv("APP_HOST"), "APP HOST")
+	port, _ := strconv.Atoi(os.Getenv("APP_PORT"))
+	flag.IntVar(&conf.appPort, "appport", port, "APP PORT")
 
 	flag.Parse()
 
@@ -31,7 +35,7 @@ func (c *Config) GetDBConnStr() string {
 }
 
 func (c *Config) GetAppHost() string {
-	return c.appHost
+	return fmt.Sprintf("%v:%v", c.appHost, c.appPort)
 }
 
 func (c *Config) getDBConnStr(dbhost, dbname string) string {

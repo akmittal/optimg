@@ -1,10 +1,12 @@
-import { Button, Form, Input, Radio, Select, Slider } from 'antd';
+import { Alert, Button, Form, Input, Radio, Select, Slider } from 'antd';
 import Title from 'antd/lib/typography/Title';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import React, { ReactElement, useReducer, useState } from 'react';
 import './optimize.css';
 import Checkbox from 'antd/lib/checkbox/Checkbox';
 import { useMutation } from 'react-query';
+import LoadingSpinner from '../components/LoadingSpinner';
+import { Redirect } from 'react-router-dom';
 const { Option } = Select;
 
 interface Transformation {
@@ -117,20 +119,30 @@ function Optimize({}: Props): ReactElement {
     return fetch('/api/optimize', {
       body: JSON.stringify(body),
       method: 'POST',
-    }).then((res: Response) => {
-      if (res.status === 200) return res.json();
-      throw res.json()
-    });
+    }).then( async (res: Response) => {
+      if (res.ok) return res.json();
+         return Promise.reject(await res.json());
+    })
   });
 
   const [form] = Form.useForm();
  
   if (isSuccess) {
-    return <div>images optimized</div>;
+    return <Redirect to="/gallery" />;
+  }
+  if (isLoading) {
+    return <LoadingSpinner />;
   }
   return (
     <div>
       <Title level={3}>Optimize</Title>
+      {isError && <Alert
+      message={(error.msg)}
+      description={error.message}
+      type="error"
+      closable
+     
+    />}
       <Form
         layout="vertical"
         form={form}
@@ -224,8 +236,13 @@ function Optimize({}: Props): ReactElement {
         <Form.Item>
           <Button
             type="primary"
-            onClick={() => {
-              mutateAsync();
+            onClick={async () => {
+              try{
+                await mutateAsync();
+              } catch(e){
+                console.log(e)
+              }
+             
             }}
           >
             Submit
