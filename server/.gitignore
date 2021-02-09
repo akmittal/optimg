@@ -15,4 +15,6 @@
 .env.production.local
 
 .idea
+./main
+./optimg
 
