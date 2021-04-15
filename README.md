@@ -7,4 +7,4 @@
 
 
 ## How to use
-WIP
+Check https://github.com/akmittal/optimg/server
