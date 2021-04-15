@@ -7,4 +7,4 @@
 
 
 ## How to use
-Check https://github.com/akmittal/optimg/server
+Check https://github.com/akmittal/optimg/tree/master/server
